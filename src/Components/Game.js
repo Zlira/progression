@@ -12,6 +12,7 @@ const FOOD_RADIUS = 16
 
 const LEFT_CODE = 37
 const RIGHT_CODE = 39
+const SPACE_CODE = 32
 
 
 const LEVEL = {
@@ -26,9 +27,12 @@ export default class Game extends React.Component {
     super(props)
     this.state = {
       characterPosition: 0,
+      characterWithFood: false,
+      foodItems: [...Array(LEVEL.itemsCount).keys()],
     }
     this.moveCharacter = this.moveCharacter.bind(this)
     this.handleKeydown = this.handleKeydown.bind(this)
+    this.togglePickUp = this.togglePickUp.bind(this)
   }
 
   handleKeydown(event) {
@@ -37,6 +41,8 @@ export default class Game extends React.Component {
       this.moveCharacter(-SPEED)
     } else if (which === RIGHT_CODE) {
       this.moveCharacter(SPEED)
+    } else if (which === SPACE_CODE) {
+      this.togglePickUp()
     }
   }
 
@@ -49,12 +55,31 @@ export default class Game extends React.Component {
     }
   }
 
+  togglePickUp() {
+    const distanceToFirst = this.state.characterPosition
+      - CHAR_RADIUS
+      - LEVEL.distanceToFirstItem
+      - FOOD_RADIUS
+    const itemIndex = Math.round(distanceToFirst / LEVEL.distanceBetweenItems)
+    if (
+      Math.abs(itemIndex * LEVEL.distanceBetweenItems - distanceToFirst) <=
+      FOOD_RADIUS + CHAR_RADIUS
+    ) {
+      if (this.state.foodItems.includes(itemIndex) && !this.state.characterWithFood) {
+        const newItems = Array.from(this.state.foodItems)
+        newItems.splice(newItems.indexOf(itemIndex), 1)
+        this.setState({
+          characterWithFood: true,
+          foodItems: newItems
+        })
+      }
+    }
+  }
   render() {
-    const foodItems = [...Array(LEVEL.itemsCount).keys()].map(
+    const foodItems = this.state.foodItems.map(
       i => <FoodItem radius={FOOD_RADIUS}
               xPos={LEVEL.distanceToFirstItem
-                    + LEVEL.distanceBetweenItems * i
-                    + FOOD_RADIUS}
+                    + LEVEL.distanceBetweenItems * i}
               yPos={0}
               key={i}/>
     )
@@ -63,13 +88,16 @@ export default class Game extends React.Component {
       width={GAME_WIDTH} height={GAME_HEIGHT} tabIndex={0}
       onKeyDown={this.handleKeydown}
       >
-        <FoodItems xPos={CHAR_RADIUS * 2} yPos={2 * CHAR_RADIUS - FOOD_RADIUS}>
+        <FoodItems xPos={CHAR_RADIUS * 2} yPos={2 * CHAR_RADIUS - 2*FOOD_RADIUS}>
           {foodItems}
         </FoodItems>
         <Character xPosition={this.state.characterPosition}
           radius={CHAR_RADIUS}
-        />
+        >
+          {this.state.characterWithFood
+            ? <FoodItem radius={FOOD_RADIUS} xPos={CHAR_RADIUS} yPos={CHAR_RADIUS}/>
+            : null}
+        </Character>
       </svg>
   }
 }
-
