@@ -9,6 +9,7 @@ const GAME_HEIGHT = 200
 const SPEED = 2
 const CHAR_RADIUS = 30
 const FOOD_RADIUS = 16
+const START_OFFSET = CHAR_RADIUS * 2
 
 const LEFT_CODE = 37
 const RIGHT_CODE = 39
@@ -26,11 +27,14 @@ export default class Game extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      characterPosition: 0,
+      characterPosition: CHAR_RADIUS,
       characterWithFood: false,
       foodItems: [...Array(LEVEL.itemsCount).keys()].map(
         i => ({index: i,
-               position: LEVEL.distanceToFirstItem + LEVEL.distanceBetweenItems * i})
+               position: LEVEL.distanceToFirstItem
+                         + LEVEL.distanceBetweenItems * i
+                         + START_OFFSET
+                         + FOOD_RADIUS})
       ),
     }
 
@@ -39,6 +43,7 @@ export default class Game extends React.Component {
     this.toggleWithFood = this.toggleWithFood.bind(this)
     this.putDownFood = this.putDownFood.bind(this)
     this.pickUpFood = this.pickUpFood.bind(this)
+    this.findNearbyFood = this.findNearbyFood.bind(this)
   }
 
   handleKeydown(event) {
@@ -72,20 +77,29 @@ export default class Game extends React.Component {
     })
   }
 
-  pickUpFood() {
-    const distanceToStart = this.state.characterPosition - CHAR_RADIUS
-    let item, newItems
+  findNearbyFood() {
+    let item
     for (let i=0; i < this.state.foodItems.length; i++) {
       item = this.state.foodItems[i]
-      if (Math.abs(item.position - distanceToStart + FOOD_RADIUS) < FOOD_RADIUS + CHAR_RADIUS) {
-        newItems = Array.from(this.state.foodItems)
-        newItems.splice(i, 1)
-        this.setState({
-          foodItems: newItems,
-          characterWithFood: item,
-        })
-        break
-      }}
+      if (
+        Math.abs(item.position - this.state.characterPosition) <
+        FOOD_RADIUS + CHAR_RADIUS
+      ) {
+        return [i, item]
+      }
+    }
+  }
+
+  pickUpFood() {
+    const nearbyFood = this.findNearbyFood()
+    if (!nearbyFood) {return}
+    const [foodIndex, foodItem] = nearbyFood
+    const newItems = Array.from(this.state.foodItems)
+    newItems.splice(foodIndex, 1)
+    this.setState({
+      foodItems: newItems,
+      characterWithFood: foodItem,
+    })
   }
 
   toggleWithFood() {
@@ -108,14 +122,14 @@ export default class Game extends React.Component {
       width={GAME_WIDTH} height={GAME_HEIGHT} tabIndex={0}
       onKeyDown={this.handleKeydown}
       >
-        <FoodItems xPos={CHAR_RADIUS * 2} yPos={2 * CHAR_RADIUS - 2*FOOD_RADIUS}>
+        <FoodItems xPos={0} yPos={2 * CHAR_RADIUS - 2*FOOD_RADIUS}>
           {foodItems}
         </FoodItems>
         <Character xPosition={this.state.characterPosition}
           radius={CHAR_RADIUS}
         >
           {this.state.characterWithFood
-            ? <FoodItem radius={FOOD_RADIUS} xPos={CHAR_RADIUS} yPos={CHAR_RADIUS}/>
+            ? <FoodItem radius={FOOD_RADIUS} xPos={0} yPos={CHAR_RADIUS}/>
             : null}
         </Character>
       </svg>
