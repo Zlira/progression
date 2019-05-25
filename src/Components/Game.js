@@ -3,6 +3,7 @@ import React from 'react'
 import Character from './Character'
 import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
+import Kitchen from './Kitchen'
 
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 200
@@ -10,6 +11,8 @@ const SPEED = 2
 const CHAR_RADIUS = 30
 const FOOD_RADIUS = 16
 const START_OFFSET = CHAR_RADIUS * 2
+const INIT_ENERY = 100
+const ENERGY_LOST_PER_TICK = .1
 
 const LEFT_CODE = 37
 const RIGHT_CODE = 39
@@ -19,7 +22,8 @@ const SPACE_CODE = 32
 const LEVEL = {
   itemsCount: 3,
   distanceBetweenItems: 200,
-  distanceToFirstItem: 100
+  distanceToFirstItem: 100,
+  reward: 70
 }
 
 
@@ -29,6 +33,7 @@ export default class Game extends React.Component {
     this.state = {
       characterPosition: CHAR_RADIUS,
       characterWithFood: false,
+      characterEnergy: INIT_ENERY,
       foodItems: [...Array(LEVEL.itemsCount).keys()].map(
         i => ({index: i,
                position: LEVEL.distanceToFirstItem
@@ -44,6 +49,7 @@ export default class Game extends React.Component {
     this.putDownFood = this.putDownFood.bind(this)
     this.pickUpFood = this.pickUpFood.bind(this)
     this.findNearbyFood = this.findNearbyFood.bind(this)
+    this.rewardShouldBeGranted = this.rewardShouldBeGranted.bind(this)
   }
 
   handleKeydown(event) {
@@ -62,8 +68,25 @@ export default class Game extends React.Component {
     newPosition = Math.max(newPosition, 0)
     newPosition = Math.min(newPosition, GAME_WIDTH - CHAR_RADIUS * 2)
     if (newPosition !== this.state.characterPosition) {
-      this.setState({characterPosition: newPosition})
+      this.setState({
+        characterPosition: newPosition,
+        // decrement energy
+        characterEnergy: this.state.characterEnergy - ENERGY_LOST_PER_TICK
+      })
     }
+  }
+
+  rewardShouldBeGranted() {
+    return this.state.foodItems.reduce(
+      (acc, item) => acc && item.position < CHAR_RADIUS * 2,
+      true
+    )
+  }
+
+  grantReward() {
+    this.setState({
+      characterEnergy: this.state.characterEnergy + LEVEL.reward
+    })
   }
 
   putDownFood() {
@@ -75,6 +98,9 @@ export default class Game extends React.Component {
       characterWithFood: false,
       foodItems: newItems,
     })
+    if (this.rewardShouldBeGranted()) {
+      this.grantReward()
+    }
   }
 
   findNearbyFood() {
@@ -122,11 +148,12 @@ export default class Game extends React.Component {
       width={GAME_WIDTH} height={GAME_HEIGHT} tabIndex={0}
       onKeyDown={this.handleKeydown}
       >
+        <Kitchen width={CHAR_RADIUS * 2}/>
         <FoodItems xPos={0} yPos={2 * CHAR_RADIUS - 2*FOOD_RADIUS}>
           {foodItems}
         </FoodItems>
         <Character xPosition={this.state.characterPosition}
-          radius={CHAR_RADIUS}
+          radius={CHAR_RADIUS} energy={Math.ceil(this.state.characterEnergy)}
         >
           {this.state.characterWithFood
             ? <FoodItem radius={FOOD_RADIUS} xPos={0} yPos={CHAR_RADIUS}/>
