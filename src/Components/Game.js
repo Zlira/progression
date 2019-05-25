@@ -24,11 +24,27 @@ const GAME_STATES = {
   lost: 'lost'
 }
 
-const LEVEL = {
+const LEVELS = [{
   itemsCount: 3,
   distanceBetweenItems: 200,
   distanceToFirstItem: 100,
   reward: 70
+}, {
+  itemsCount: 4,
+  distanceBetweenItems: 100,
+  distanceToFirstItem: 200,
+  reward: 70
+}]
+
+
+function getFoodItmesFromLevel(level) {
+  return [...Array(level.itemsCount).keys()].map(
+        i => ({index: i,
+               position: level.distanceToFirstItem
+                         + level.distanceBetweenItems * i
+                         + START_OFFSET
+                         + FOOD_RADIUS})
+  )
 }
 
 
@@ -40,13 +56,8 @@ export default class Game extends React.Component {
       characterWithFood: false,
       characterEnergy: INIT_ENERY,
       gameState: GAME_STATES.playing,
-      foodItems: [...Array(LEVEL.itemsCount).keys()].map(
-        i => ({index: i,
-               position: LEVEL.distanceToFirstItem
-                         + LEVEL.distanceBetweenItems * i
-                         + START_OFFSET
-                         + FOOD_RADIUS})
-      ),
+      foodItems: getFoodItmesFromLevel(LEVELS[0]),
+      level: 0
     }
 
     this.moveCharacter = this.moveCharacter.bind(this)
@@ -95,8 +106,15 @@ export default class Game extends React.Component {
   }
 
   grantReward() {
+    const newLevel = this.state.level + 1
+    if (newLevel > LEVELS.length - 1) {
+      this.setState({gameState: GAME_STATES.won})
+      return
+    }
     this.setState({
-      characterEnergy: this.state.characterEnergy + LEVEL.reward
+      characterEnergy: this.state.characterEnergy + LEVELS[this.state.level].reward,
+      level: newLevel,
+      foodItems: getFoodItmesFromLevel(LEVELS[newLevel])
     })
   }
 
