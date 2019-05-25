@@ -28,11 +28,17 @@ export default class Game extends React.Component {
     this.state = {
       characterPosition: 0,
       characterWithFood: false,
-      foodItems: [...Array(LEVEL.itemsCount).keys()],
+      foodItems: [...Array(LEVEL.itemsCount).keys()].map(
+        i => ({index: i,
+               position: LEVEL.distanceToFirstItem + LEVEL.distanceBetweenItems * i})
+      ),
     }
+
     this.moveCharacter = this.moveCharacter.bind(this)
     this.handleKeydown = this.handleKeydown.bind(this)
-    this.togglePickUp = this.togglePickUp.bind(this)
+    this.toggleWithFood = this.toggleWithFood.bind(this)
+    this.putDownFood = this.putDownFood.bind(this)
+    this.pickUpFood = this.pickUpFood.bind(this)
   }
 
   handleKeydown(event) {
@@ -42,7 +48,7 @@ export default class Game extends React.Component {
     } else if (which === RIGHT_CODE) {
       this.moveCharacter(SPEED)
     } else if (which === SPACE_CODE) {
-      this.togglePickUp()
+      this.toggleWithFood()
     }
   }
 
@@ -55,33 +61,47 @@ export default class Game extends React.Component {
     }
   }
 
-  togglePickUp() {
-    const distanceToFirst = this.state.characterPosition
-      - CHAR_RADIUS
-      - LEVEL.distanceToFirstItem
-      - FOOD_RADIUS
-    const itemIndex = Math.round(distanceToFirst / LEVEL.distanceBetweenItems)
-    if (
-      Math.abs(itemIndex * LEVEL.distanceBetweenItems - distanceToFirst) <=
-      FOOD_RADIUS + CHAR_RADIUS
-    ) {
-      if (this.state.foodItems.includes(itemIndex) && !this.state.characterWithFood) {
-        const newItems = Array.from(this.state.foodItems)
-        newItems.splice(newItems.indexOf(itemIndex), 1)
+  putDownFood() {
+    const newItems = Array.from(this.state.foodItems)
+    const newItem = this.state.characterWithFood
+    newItem.position = this.state.characterPosition
+    newItems.push(newItem)
+    this.setState({
+      characterWithFood: false,
+      foodItems: newItems,
+    })
+  }
+
+  pickUpFood() {
+    const distanceToStart = this.state.characterPosition - CHAR_RADIUS
+    let item, newItems
+    for (let i=0; i < this.state.foodItems.length; i++) {
+      item = this.state.foodItems[i]
+      if (Math.abs(item.position - distanceToStart + FOOD_RADIUS) < FOOD_RADIUS + CHAR_RADIUS) {
+        newItems = Array.from(this.state.foodItems)
+        newItems.splice(i, 1)
         this.setState({
-          characterWithFood: true,
-          foodItems: newItems
+          foodItems: newItems,
+          characterWithFood: item,
         })
-      }
+        break
+      }}
+  }
+
+  toggleWithFood() {
+    if (this.state.characterWithFood) {
+      this.putDownFood()
+    } else {
+      this.pickUpFood()
     }
   }
+
   render() {
     const foodItems = this.state.foodItems.map(
       i => <FoodItem radius={FOOD_RADIUS}
-              xPos={LEVEL.distanceToFirstItem
-                    + LEVEL.distanceBetweenItems * i}
+              xPos={i.position}
               yPos={0}
-              key={i}/>
+              key={i.index}/>
     )
     return <svg
       focusable={true} xmlns="http://www.w3.org/2000/svg"
