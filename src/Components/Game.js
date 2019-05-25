@@ -4,9 +4,10 @@ import Character from './Character'
 import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
 import Kitchen from './Kitchen'
+import {Defeat} from './EndGame'
 
 const GAME_WIDTH = 1000
-const GAME_HEIGHT = 200
+const GAME_HEIGHT = 60
 const SPEED = 2
 const CHAR_RADIUS = 30
 const FOOD_RADIUS = 16
@@ -17,7 +18,11 @@ const ENERGY_LOST_PER_TICK = .1
 const LEFT_CODE = 37
 const RIGHT_CODE = 39
 const SPACE_CODE = 32
-
+const GAME_STATES = {
+  playing: 'playing',
+  won: 'won',
+  lost: 'lost'
+}
 
 const LEVEL = {
   itemsCount: 3,
@@ -34,6 +39,7 @@ export default class Game extends React.Component {
       characterPosition: CHAR_RADIUS,
       characterWithFood: false,
       characterEnergy: INIT_ENERY,
+      gameState: GAME_STATES.playing,
       foodItems: [...Array(LEVEL.itemsCount).keys()].map(
         i => ({index: i,
                position: LEVEL.distanceToFirstItem
@@ -53,6 +59,7 @@ export default class Game extends React.Component {
   }
 
   handleKeydown(event) {
+    if (this.state.gameState !== GAME_STATES.playing) {return}
     const which = event.which
     if (which === LEFT_CODE) {
       this.moveCharacter(-SPEED)
@@ -68,10 +75,14 @@ export default class Game extends React.Component {
     newPosition = Math.max(newPosition, 0)
     newPosition = Math.min(newPosition, GAME_WIDTH - CHAR_RADIUS * 2)
     if (newPosition !== this.state.characterPosition) {
+      const newEnergy = this.state.characterEnergy - ENERGY_LOST_PER_TICK
+      if (newEnergy < 0) {
+        this.setState({gameState: GAME_STATES.lost})
+      }
       this.setState({
         characterPosition: newPosition,
         // decrement energy
-        characterEnergy: this.state.characterEnergy - ENERGY_LOST_PER_TICK
+        characterEnergy: newEnergy
       })
     }
   }
@@ -159,6 +170,9 @@ export default class Game extends React.Component {
             ? <FoodItem radius={FOOD_RADIUS} xPos={0} yPos={CHAR_RADIUS}/>
             : null}
         </Character>
+        {this.state.gameState === GAME_STATES.lost
+          ? <Defeat width={GAME_WIDTH} height={GAME_HEIGHT}/>
+          : null}
       </svg>
   }
 }
