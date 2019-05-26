@@ -4,7 +4,7 @@ import Character from './Character'
 import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
 import Kitchen from './Kitchen'
-import {Defeat} from './EndGame'
+import {Defeat, Victory} from './EndGame'
 
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
@@ -14,10 +14,12 @@ const FOOD_RADIUS = 16
 const START_OFFSET = CHAR_RADIUS * 2
 const INIT_ENERY = 100
 const ENERGY_LOST_PER_TICK = .1
+const SLEEP_COST = 50
 
 const LEFT_CODE = 37
 const RIGHT_CODE = 39
 const SPACE_CODE = 32
+const S_CODE = 83
 const GAME_STATES = {
   playing: 'playing',
   won: 'won',
@@ -30,7 +32,7 @@ const LEVELS = [{
   distanceToFirstItem: 100,
   reward: 70
 }, {
-  itemsCount: 4,
+  itemsCount: 1,
   distanceBetweenItems: 100,
   distanceToFirstItem: 200,
   reward: 70
@@ -67,10 +69,13 @@ export default class Game extends React.Component {
     this.pickUpFood = this.pickUpFood.bind(this)
     this.findNearbyFood = this.findNearbyFood.bind(this)
     this.rewardShouldBeGranted = this.rewardShouldBeGranted.bind(this)
+    this.fallAsleep = this.fallAsleep.bind(this)
+    this.checkEnergy = this.checkEnergy.bind(this)
   }
 
   handleKeydown(event) {
     if (this.state.gameState !== GAME_STATES.playing) {return}
+    // rewrite switch/case
     const which = event.which
     if (which === LEFT_CODE) {
       this.moveCharacter(-SPEED)
@@ -78,18 +83,43 @@ export default class Game extends React.Component {
       this.moveCharacter(SPEED)
     } else if (which === SPACE_CODE) {
       this.toggleWithFood()
+    } else if (which === S_CODE) {
+      this.fallAsleep()
     }
+  }
+
+  checkEnergy(newEnergy) {
+    if (newEnergy < 0) {
+      this.setState({gameState: GAME_STATES.lost})
+    }
+  }
+
+
+  fallAsleep() {
+    const newEnergy = this.state.characterEnergy - SLEEP_COST
+    const newLevel = this.state.level + 1
+    if (newLevel >= LEVELS.length) {
+      this.setState({
+        characterEnergy: newEnergy,
+        gameState: GAME_STATES.won,
+      })
+      return
+    }
+    this.checkEnergy(newEnergy)
+    this.setState({
+      characterEnergy: newEnergy,
+      level: newLevel,
+      foodItems: getFoodItmesFromLevel(LEVELS[newLevel]),
+    })
   }
 
   moveCharacter(velocity) {
     let newPosition = this.state.characterPosition + velocity
-    newPosition = Math.max(newPosition, 0)
-    newPosition = Math.min(newPosition, GAME_WIDTH - CHAR_RADIUS * 2)
+    newPosition = Math.max(newPosition, CHAR_RADIUS)
+    newPosition = Math.min(newPosition, GAME_WIDTH - CHAR_RADIUS)
     if (newPosition !== this.state.characterPosition) {
       const newEnergy = this.state.characterEnergy - ENERGY_LOST_PER_TICK
-      if (newEnergy < 0) {
-        this.setState({gameState: GAME_STATES.lost})
-      }
+      this.checkEnergy()
       this.setState({
         characterPosition: newPosition,
         // decrement energy
@@ -107,12 +137,17 @@ export default class Game extends React.Component {
 
   grantReward() {
     const newLevel = this.state.level + 1
+    const newEnergy = this.state.characterEnergy + LEVELS[this.state.level].reward
     if (newLevel > LEVELS.length - 1) {
-      this.setState({gameState: GAME_STATES.won})
+      this.setState({
+        gameState: GAME_STATES.won,
+        characterEnergy: newEnergy,
+        foodItems: [],
+      })
       return
     }
     this.setState({
-      characterEnergy: this.state.characterEnergy + LEVELS[this.state.level].reward,
+      characterEnergy: newEnergy,
       level: newLevel,
       foodItems: getFoodItmesFromLevel(LEVELS[newLevel])
     })
@@ -172,6 +207,18 @@ export default class Game extends React.Component {
               yPos={0}
               key={i.index}/>
     )
+    let endscreen
+    switch (this.state.gameState) {
+      case GAME_STATES.lost:
+        endscreen = <Defeat width={GAME_WIDTH} height={GAME_HEIGHT}/>
+        break;
+      case GAME_STATES.won:
+        endscreen = <Victory width={GAME_WIDTH} height={GAME_HEIGHT}/>
+        break;
+      default:
+        endscreen = null
+        break;
+    }
     return <svg
       focusable={true} xmlns="http://www.w3.org/2000/svg"
       width={GAME_WIDTH} height={GAME_HEIGHT} tabIndex={0}
@@ -188,9 +235,8 @@ export default class Game extends React.Component {
             ? <FoodItem radius={FOOD_RADIUS} xPos={0} yPos={CHAR_RADIUS}/>
             : null}
         </Character>
-        {this.state.gameState === GAME_STATES.lost
-          ? <Defeat width={GAME_WIDTH} height={GAME_HEIGHT}/>
-          : null}
+        <text x={GAME_WIDTH - 100} y={20}>{'Рівень ' + (this.state.level + 1)}</text>
+        {endscreen}
       </svg>
   }
 }
