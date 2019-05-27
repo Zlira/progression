@@ -5,6 +5,7 @@ import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
 import Kitchen from './Kitchen'
 import {Defeat, Victory} from './EndGame'
+import {LEVELS} from '../GameData/Levels'
 
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
@@ -26,18 +27,6 @@ const GAME_STATES = {
   lost: 'lost'
 }
 
-const LEVELS = [{
-  itemsCount: 3,
-  distanceBetweenItems: 200,
-  distanceToFirstItem: 100,
-  reward: 70
-}, {
-  itemsCount: 1,
-  distanceBetweenItems: 100,
-  distanceToFirstItem: 200,
-  reward: 70
-}]
-
 
 function getFoodItmesFromLevel(level) {
   return [...Array(level.itemsCount).keys()].map(
@@ -47,6 +36,14 @@ function getFoodItmesFromLevel(level) {
                          + START_OFFSET
                          + FOOD_RADIUS})
   )
+}
+
+
+function getLevelCost(level) {
+  const a_1 = level.distanceToFirstItem
+  const d = level.distanceBetweenItems
+  const n = level.itemsCount
+  return (a_1 * 2 + d * (n - 1)) * n
 }
 
 
@@ -110,6 +107,7 @@ export default class Game extends React.Component {
       characterEnergy: newEnergy,
       level: newLevel,
       foodItems: getFoodItmesFromLevel(LEVELS[newLevel]),
+      characterWithFood: false,
     })
   }
 
@@ -119,7 +117,7 @@ export default class Game extends React.Component {
     newPosition = Math.min(newPosition, GAME_WIDTH - CHAR_RADIUS)
     if (newPosition !== this.state.characterPosition) {
       const newEnergy = this.state.characterEnergy - ENERGY_LOST_PER_TICK
-      this.checkEnergy()
+      this.checkEnergy(newEnergy)
       this.setState({
         characterPosition: newPosition,
         // decrement energy
@@ -137,7 +135,10 @@ export default class Game extends React.Component {
 
   grantReward() {
     const newLevel = this.state.level + 1
-    const newEnergy = this.state.characterEnergy + LEVELS[this.state.level].reward
+    const newEnergy = Math.min(
+      this.state.characterEnergy + LEVELS[this.state.level].reward,
+      INIT_ENERY
+    )
     if (newLevel > LEVELS.length - 1) {
       this.setState({
         gameState: GAME_STATES.won,
@@ -235,7 +236,11 @@ export default class Game extends React.Component {
             ? <FoodItem radius={FOOD_RADIUS} xPos={0} yPos={CHAR_RADIUS}/>
             : null}
         </Character>
-        <text x={GAME_WIDTH - 100} y={20}>{'Рівень ' + (this.state.level + 1)}</text>
+        <text x={GAME_WIDTH - 150} y={16}>{'Рівень ' + (this.state.level + 1)}</text>
+        <text x={GAME_WIDTH - 150} y={31}>{'Винагорода ' + LEVELS[this.state.level].reward}</text>
+        <text x={GAME_WIDTH - 150} y={46}>{
+          'Ціна ' + getLevelCost(LEVELS[this.state.level])
+        }</text>
         {endscreen}
       </svg>
   }
