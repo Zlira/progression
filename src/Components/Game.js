@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react'
+import React, {useReducer, useState, useEffect, useRef} from 'react'
 
 import Character from './Character'
 import FoodItem from './FoodItem'
@@ -7,6 +7,7 @@ import Kitchen from './Kitchen'
 import {Defeat, Victory} from './EndGame'
 import {LEVELS} from '../GameData/Levels'
 import {getInitState, gameReducer} from '../Reducer'
+import {useAnimationFrame} from '../Hooks/useAnimationEffect'
 
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
@@ -33,7 +34,7 @@ function getLevelCost(level) {
 }
 
 
-function handleKeydown(event, state, dispatch) {
+function userHandler(event, state, dispatch) {
   if (state.gameState !== GAME_STATES.playing) {return}
   // rewrite switch/case
   const which = event.which
@@ -64,8 +65,7 @@ function getEndscreen(gameState) {
 }
 
 
-export default function Game() {
-  const [state, dispatch] = useReducer(gameReducer, getInitState())
+function Game({state, handleKeydown}) {
   const {
     foodItems, gameState, level, characterPosition,
     characterWithFood, characterEnergy
@@ -80,7 +80,7 @@ export default function Game() {
   return <svg
     focusable={true} xmlns="http://www.w3.org/2000/svg"
     width={GAME_WIDTH} height={GAME_HEIGHT} tabIndex={0}
-    onKeyDown={event => handleKeydown(event, state, dispatch)}
+    onKeyDown={handleKeydown}
     >
       <Kitchen width={CHAR_RADIUS * 2}/>
       <FoodItems xPos={0} yPos={2 * CHAR_RADIUS - 2*FOOD_RADIUS}>
@@ -100,4 +100,83 @@ export default function Game() {
       }</text>
       {endscreen}
     </svg>
+
+}
+
+export default function UserControlledGame() {
+  const [state, dispatch] = useReducer(gameReducer, getInitState())
+  return <Game state={state}
+           handleKeydown={(event) => userHandler(event, state, dispatch)}/>
+}
+
+function autoHandler(event, state, dispatch) {
+  if (state.gameState !== GAME_STATES.playing) {return}
+  // rewrite switch/case
+  const which = event.which
+  if (which === LEFT_CODE) {
+    dispatch({type: 'MOVE', displacement: -SPEED})
+  } else if (which === RIGHT_CODE) {
+    dispatch({type: 'MOVE', displacement: SPEED})
+  } else if (which === PICKUP_CODE) {
+    if (state.characterWithFood) {
+      dispatch({type: 'PUT_DOWN_FOOD'})
+    } else {
+      dispatch({type: 'PICKUP_FOOD'})
+    }
+  } else if (which === S_CODE) {
+    dispatch({type: 'FALL_ASLEEP'})
+  }
+}
+
+// maybe different levels?
+export function AutopilotGame({trajectoryGenerator}) {
+  const [gState, dispatch] = useReducer(gameReducer, getInitState())
+  const [automationState, setAutomationState] = useState({
+    running: false,
+    targetItem: 0,
+    direction: 1,
+  })
+  const {targetItem, direction} = automationState
+  const {gameState, characterPosition, foodItems, characterWithFood} = gState
+  const runAutopilot = () => {
+    if (gameState !== 'playing' ||
+        targetItem >= foodItems.length + (characterWithFood? 1 : 0)) {
+      return
+    }
+    const movingForward = direction > 0
+    const foodItem = foodItems.reduce(
+      (acc, item) => item.index === targetItem? item : acc, undefined
+    )
+    const targetPos = movingForward? foodItem.position : CHAR_RADIUS
+    console.log(direction, targetPos)
+    if (
+      (characterPosition >= targetPos &&
+       direction > 0) ||
+      (characterPosition <= targetPos &&
+       direction < 0)
+    ) {
+      console.log(characterPosition, movingForward)
+      setAutomationState({
+        ...automationState,
+        direction: direction * -1,
+        targetItem: !movingForward? targetItem + 1 : targetItem
+      })
+      dispatch({type: movingForward? 'PICKUP_FOOD' : 'PUT_DOWN_FOOD'})
+    }
+    dispatch({type: 'MOVE', displacement: SPEED * direction})
+  }
+  useAnimationFrame(runAutopilot)
+  return <Game state={gState} handleKeydown={() => null}/>
+  // first level - user pressed S (sleep) or G (go)
+  // if go:
+  //    generate trajectory for current level
+  //    set state to running and (?) don't react to keys
+  //    start move sequence:
+  //      run to the first point
+  //      pickup
+  //      return to the next point
+  //      putdown
+  //      run to the next point etc
+  // if everything was collected go the the next level
+  // wait for next instrunctions
 }

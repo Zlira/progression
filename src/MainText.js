@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Game from './Components/Game'
+import Game, {AutopilotGame} from './Components/Game'
 
 export default function MainText() {
   return <article>
@@ -47,8 +47,8 @@ export default function MainText() {
 </p>
 
 ------------- віджет для вводу формули -----------------------<br/>
-------------- гра з автопілотом ----------------------<br/>
-
+<AutopilotGame/>
+<br/>
 --------- коли буде успіх, гіфка або відео it’s alive!!! -------------<br/>
 <p>
 Вітаю! Ти навчив/ла Бойла самостійно пересуватися і, мабуть, вже знаєш, до чого тут арифметична прогресія а, якщо — ні, то зараз дізнаєшся. Список відстаней, які ми отримали на виході — це і є якраз ця сама прогресія. Або, математичною мовою:
