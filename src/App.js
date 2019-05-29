@@ -1,12 +1,12 @@
 import React from 'react';
 
-import Game from './Components/Game'
+import MainText from './MainText'
 
 
 function App() {
   return (
     <div className="progression-poc">
-      <Game/>
+      <MainText/>
     </div>
   );
 }
