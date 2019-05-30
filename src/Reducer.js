@@ -1,5 +1,6 @@
 import {LEVELS} from './GameData/Levels'
 
+// todo move this to separate file
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
 const SPEED = 2
@@ -10,6 +11,7 @@ const INIT_ENERY = 100
 const ENERGY_LOST_PER_TICK = .1
 const SLEEP_COST = 50
 
+// todo rename this to status
 const GAME_STATES = {
   playing: 'playing',
   won: 'won',
@@ -84,7 +86,8 @@ function grantReward(state) {
     ...state,
     characterEnergy: newEnergy,
     level: newLevel,
-    foodItems: getFoodItmesFromLevel(LEVELS[newLevel])
+    foodItems: getFoodItmesFromLevel(LEVELS[newLevel]),
+    levelChanged: true,
   }
 }
 
@@ -155,22 +158,26 @@ function fallAsleep(state) {
   return {
     ...newState,
     characterWithFood: false,
+    levelChanged: true,
   }
 }
 
 
 export function getInitState() {
+  const initLevel = 0
   return {
     characterPosition: CHAR_RADIUS,
     characterWithFood: false,
     characterEnergy: INIT_ENERY,
     gameState: GAME_STATES.playing,
-    foodItems: getFoodItmesFromLevel(LEVELS[0]),
-    level: 0
+    foodItems: getFoodItmesFromLevel(LEVELS[initLevel]),
+    level: initLevel,
+    levelChanged: false,
   }
 }
 
 export function gameReducer(state, action) {
+  state = {...state, levelChanged: false}
   switch (action.type) {
     case 'MOVE':
       return move(state, action.displacement)

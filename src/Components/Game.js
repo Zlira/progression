@@ -1,4 +1,4 @@
-import React, {useReducer, useState, useEffect, useRef} from 'react'
+import React, {useReducer, useState} from 'react'
 
 import Character from './Character'
 import FoodItem from './FoodItem'
@@ -8,6 +8,8 @@ import {Defeat, Victory} from './EndGame'
 import {LEVELS} from '../GameData/Levels'
 import {getInitState, gameReducer} from '../Reducer'
 import {useAnimationFrame} from '../Hooks/useAnimationEffect'
+import usePervious from '../Hooks/usePervious'
+
 
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
@@ -19,6 +21,8 @@ const LEFT_CODE = 37
 const RIGHT_CODE = 39
 const PICKUP_CODE = 16
 const S_CODE = 83
+const GO_CODE = 71
+
 const GAME_STATES = {
   playing: 'playing',
   won: 'won',
@@ -109,22 +113,22 @@ export default function UserControlledGame() {
            handleKeydown={(event) => userHandler(event, state, dispatch)}/>
 }
 
-function autoHandler(event, state, dispatch) {
-  if (state.gameState !== GAME_STATES.playing) {return}
+function autoHandler(event, gameState, automatState, dispatch, setAutomatState) {
+  if (
+    gameState.gameState !== GAME_STATES.playing ||
+    automatState.running
+  ) {return}
   // rewrite switch/case
   const which = event.which
-  if (which === LEFT_CODE) {
-    dispatch({type: 'MOVE', displacement: -SPEED})
-  } else if (which === RIGHT_CODE) {
-    dispatch({type: 'MOVE', displacement: SPEED})
-  } else if (which === PICKUP_CODE) {
-    if (state.characterWithFood) {
-      dispatch({type: 'PUT_DOWN_FOOD'})
-    } else {
-      dispatch({type: 'PICKUP_FOOD'})
-    }
-  } else if (which === S_CODE) {
-    dispatch({type: 'FALL_ASLEEP'})
+  switch (which) {
+    case S_CODE:
+      dispatch({type: 'FALL_ASLEEP'})
+      break
+    case GO_CODE:
+      setAutomatState({...automatState, running: true})
+      break
+    default:
+      break
   }
 }
 
@@ -136,26 +140,33 @@ export function AutopilotGame({trajectoryGenerator}) {
     targetItem: 0,
     direction: 1,
   })
-  const {targetItem, direction} = automationState
-  const {gameState, characterPosition, foodItems, characterWithFood} = gState
+  const {targetItem, direction, running} = automationState
+  const {gameState, characterPosition, foodItems, levelChanged} = gState
+  if (levelChanged && targetItem !==0) {
+    setAutomationState({
+      ...automationState,
+      running: false,
+      targetItem: 0,
+    })
+  }
   const runAutopilot = () => {
-    if (gameState !== 'playing' ||
-        targetItem >= foodItems.length + (characterWithFood? 1 : 0)) {
-      return
-    }
+    if (gameState !== 'playing' || !running) {return}
+    // if level changed
+    //if (targetItem >= foodItems.length + (characterWithFood? 1 : 0)) {
     const movingForward = direction > 0
     const foodItem = foodItems.reduce(
       (acc, item) => item.index === targetItem? item : acc, undefined
     )
-    const targetPos = movingForward? foodItem.position : CHAR_RADIUS
-    console.log(direction, targetPos)
+    if (!foodItem && movingForward) {return}
+    const targetPos = movingForward
+      ? foodItem.position - CHAR_RADIUS - FOOD_RADIUS + 2
+      : CHAR_RADIUS * 2 - 2
     if (
       (characterPosition >= targetPos &&
        direction > 0) ||
       (characterPosition <= targetPos &&
        direction < 0)
     ) {
-      console.log(characterPosition, movingForward)
       setAutomationState({
         ...automationState,
         direction: direction * -1,
@@ -163,10 +174,13 @@ export function AutopilotGame({trajectoryGenerator}) {
       })
       dispatch({type: movingForward? 'PICKUP_FOOD' : 'PUT_DOWN_FOOD'})
     }
+    // this can miss the target point by 1px because speed is 2px,
+    // todo account for that
     dispatch({type: 'MOVE', displacement: SPEED * direction})
   }
   useAnimationFrame(runAutopilot)
-  return <Game state={gState} handleKeydown={() => null}/>
+  return <Game state={gState}
+    handleKeydown={(e) => autoHandler(e, gState, automationState, dispatch, setAutomationState)}/>
   // first level - user pressed S (sleep) or G (go)
   // if go:
   //    generate trajectory for current level
