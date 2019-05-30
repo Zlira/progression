@@ -8,12 +8,11 @@ import {Defeat, Victory} from './EndGame'
 import {LEVELS} from '../GameData/Levels'
 import {getInitState, gameReducer} from '../Reducer'
 import {useAnimationFrame} from '../Hooks/useAnimationEffect'
-import usePervious from '../Hooks/usePervious'
 
 
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
-const SPEED = 2
+const SPEED = 3
 const CHAR_RADIUS = 30
 const FOOD_RADIUS = 16
 
@@ -133,21 +132,34 @@ function autoHandler(event, gameState, automatState, dispatch, setAutomatState) 
 }
 
 // maybe different levels?
-export function AutopilotGame({trajectoryGenerator}) {
+export function AutopilotGame({trajectoryGenerator, decisionMaker}) {
+  const hasDecisionMaker = decisionMaker !== undefined
   const [gState, dispatch] = useReducer(gameReducer, getInitState())
   const [automationState, setAutomationState] = useState({
     running: false,
     targetItem: 0,
     direction: 1,
   })
+  const [decisionMakerRunning, setDMRunning] = useState(false)
   const {targetItem, direction, running} = automationState
-  const {gameState, characterPosition, foodItems, levelChanged} = gState
+  const {gameState, characterPosition, foodItems, level, levelChanged} = gState
   if (levelChanged && targetItem !==0) {
     setAutomationState({
       ...automationState,
       running: false,
       targetItem: 0,
     })
+  }
+  if (hasDecisionMaker && decisionMakerRunning && !running) {
+    if (decisionMaker(level)) {
+      setAutomationState({
+        ...automationState,
+        running: true,
+        targetItem: 0,
+      })
+    } else {
+      dispatch({type: 'FALL_ASLEEP'})
+    }
   }
   const runAutopilot = () => {
     if (gameState !== 'playing' || !running) {return}
@@ -179,18 +191,19 @@ export function AutopilotGame({trajectoryGenerator}) {
     dispatch({type: 'MOVE', displacement: SPEED * direction})
   }
   useAnimationFrame(runAutopilot)
-  return <Game state={gState}
-    handleKeydown={(e) => autoHandler(e, gState, automationState, dispatch, setAutomationState)}/>
-  // first level - user pressed S (sleep) or G (go)
-  // if go:
-  //    generate trajectory for current level
-  //    set state to running and (?) don't react to keys
-  //    start move sequence:
-  //      run to the first point
-  //      pickup
-  //      return to the next point
-  //      putdown
-  //      run to the next point etc
-  // if everything was collected go the the next level
-  // wait for next instrunctions
+  let keyDownHandler
+  if (!hasDecisionMaker) {
+    keyDownHandler = (e) => autoHandler(
+      e, gState, automationState, dispatch, setAutomationState
+    )
+  } else {
+    keyDownHandler = (e) => {
+      if (gState.gameState === GAME_STATES.playing &&
+        !automationState.running &&
+        e.which === GO_CODE) {
+          setDMRunning(true)
+      }
+    }
+  }
+  return <Game state={gState} handleKeydown={keyDownHandler}/>
 }

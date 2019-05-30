@@ -3,12 +3,12 @@ import {LEVELS} from './GameData/Levels'
 // todo move this to separate file
 const GAME_WIDTH = 1000
 const GAME_HEIGHT = 60
-const SPEED = 2
+const SPEED = 3
 const CHAR_RADIUS = 30
 const FOOD_RADIUS = 16
 const START_OFFSET = CHAR_RADIUS * 2
 const INIT_ENERY = 100
-const ENERGY_LOST_PER_TICK = .1
+const ENERGY_LOST_PER_TICK = .05 * SPEED
 const SLEEP_COST = 50
 
 // todo rename this to status
