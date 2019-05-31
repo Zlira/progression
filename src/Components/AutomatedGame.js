@@ -101,5 +101,7 @@ export default function AutopilotGame({trajectoryGenerator, decisionMaker}) {
       }
     }
   }
-  return <Game state={gState} handleKeydown={keyDownHandler}/>
+  return <Game state={gState}
+           handleKeydown={keyDownHandler}
+           handleKeyup={() => null}/>
 }

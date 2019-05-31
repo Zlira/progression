@@ -80,6 +80,7 @@ function grantReward(state) {
 
 
 function move(state, displacement) {
+  state = {...state, direction: displacement > 0? 1 : -1}
   let newPosition = state.characterPosition + displacement
   newPosition = keepWithingBrackets(CHAR_RADIUS, GAME_WIDTH, newPosition)
   if (newPosition === state.characterPosition) {
@@ -161,15 +162,25 @@ export function getInitState() {
     foodItems: getFoodItmesFromLevel(LEVELS[initLevel]),
     level: initLevel,
     levelChanged: false,
+    direction: 0,
   }
 }
 
 
 export function gameReducer(state, action) {
-  state = {...state, levelChanged: false}
+  state = {
+    ...state,
+    levelChanged: false,
+    direction: 0
+  }
   switch (action.type) {
     case 'MOVE':
       return move(state, action.displacement)
+    case 'STOP':
+      console.log('stopping')
+      return {
+        ...state, direction: 0
+      }
     case 'PICKUP_FOOD':
       return pickUpFood(state)
     case 'PUT_DOWN_FOOD':

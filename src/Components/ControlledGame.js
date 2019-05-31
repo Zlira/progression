@@ -30,5 +30,6 @@ function userHandler(event, state, dispatch) {
 export default function UserControlledGame() {
   const [state, dispatch] = useReducer(gameReducer, getInitState())
   return <Game state={state}
-           handleKeydown={(event) => userHandler(event, state, dispatch)}/>
+           handleKeydown={(event) => userHandler(event, state, dispatch)}
+           handleKeyup={() => dispatch({type: 'STOP'})}/>
 }

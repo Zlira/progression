@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react'
 import { Stage, Sprite } from "react-pixi-fiber"
 import * as PIXI from 'pixi.js'
 
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 export default function TryPixi() {
   const [textures, setTextures] = useState([])
