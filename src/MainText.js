@@ -2,7 +2,7 @@ import React from 'react'
 
 import ControlledGame from './Components/ControlledGame'
 import AutomatedGame from './Components/AutomatedGame'
-import TryPixi from './Components/TryPixi'
+
 
 export default function MainText() {
   return <article>

@@ -16,7 +16,10 @@ class App extends React.Component {
     const setup = () => {
       this.setState({texturesLoaded: true})
     }
-    PIXI.loader.add("sprites/spritesheet.json").load(setup);
+    PIXI.loader
+      .add("sprites/spritesheet.json")
+      .add("sprites/background.json")
+      .load(setup);
   }
 
   render() {

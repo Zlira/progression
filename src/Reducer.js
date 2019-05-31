@@ -177,7 +177,6 @@ export function gameReducer(state, action) {
     case 'MOVE':
       return move(state, action.displacement)
     case 'STOP':
-      console.log('stopping')
       return {
         ...state, direction: 0
       }

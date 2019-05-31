@@ -24,7 +24,6 @@ export default class Character extends React.Component {
           textureIndex: (prevState.textureIndex ===4? 5 : 4)
         })), 350
       )
-      console.log(intervalIndex)
       this.setState({
         textureIndex: 4,
         intervalIndex: intervalIndex,

@@ -7,6 +7,7 @@ import {
   GAME_STATUS, FOOD_RADIUS, CHAR_RADIUS,
   GAME_WIDTH, GAME_HEIGHT, BG_COLOR,
 } from '../GameData/Options'
+import Background from './Background'
 import Character from './Character'
 import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
@@ -43,11 +44,11 @@ export default function Game({state, handleKeydown, handleKeyup}) {
     backgroundColor: BG_COLOR,
   }
   const {characterPosition, characterEnergy, direction} = state
-  console.log(direction)
   return (
     <div focusable={true} tabIndex={0}
       onKeyDown={handleKeydown} onKeyUp={handleKeyup}>
       <Stage options={stageOptions} width={GAME_WIDTH} height={GAME_HEIGHT}>
+         <Background width={GAME_WIDTH} />
          <Character xPosition={characterPosition}
            radius={CHAR_RADIUS} energy={Math.ceil(characterEnergy)}
            direction={direction}
