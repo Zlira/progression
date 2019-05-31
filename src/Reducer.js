@@ -1,22 +1,9 @@
 import {LEVELS} from './GameData/Levels'
-
-// todo move this to separate file
-const GAME_WIDTH = 1000
-const GAME_HEIGHT = 60
-const SPEED = 3
-const CHAR_RADIUS = 30
-const FOOD_RADIUS = 16
-const START_OFFSET = CHAR_RADIUS * 2
-const INIT_ENERY = 100
-const ENERGY_LOST_PER_TICK = .05 * SPEED
-const SLEEP_COST = 50
-
-// todo rename this to status
-const GAME_STATES = {
-  playing: 'playing',
-  won: 'won',
-  lost: 'lost'
-}
+import {
+  FOOD_RADIUS, CHAR_RADIUS, START_OFFSET,
+  INIT_ENERY, GAME_STATUS, GAME_WIDTH,
+  ENERGY_LOST_PER_TICK, SLEEP_COST,
+} from './GameData/Options'
 
 
 function keepWithingBrackets(min, max, num) {
@@ -27,11 +14,11 @@ function keepWithingBrackets(min, max, num) {
 
 function decrementEnergy(state, amount) {
   const newEnergy = state.characterEnergy - amount
-  let gameState = state.gameState
+  let gameStatus = state.gameStatus
   if (newEnergy < 0) {
-    gameState = GAME_STATES.lost
+    gameStatus = GAME_STATUS.lost
   }
-  return {...state, gameState: gameState, characterEnergy: newEnergy}
+  return {...state, gameStatus: gameStatus, characterEnergy: newEnergy}
 }
 
 
@@ -77,7 +64,7 @@ function grantReward(state) {
   if (newLevel > LEVELS.length - 1) {
     return {
       ...state,
-      gameState: GAME_STATES.won,
+      gameStatus: GAME_STATUS.won,
       characterEnergy: newEnergy,
       foodItems: [],
     }
@@ -140,16 +127,17 @@ function putDownFood(state) {
   }
 }
 
+
 function fallAsleep(state) {
   const newLevel = state.level + 1
   let newState = {...state}
   if (newLevel >= LEVELS.length) {
-    newState = {...newState, gameState: GAME_STATES.won}
+    newState = {...newState, gameStatus: GAME_STATUS.won}
   } else {
     newState = {...newState, level: newLevel}
   }
   newState = decrementEnergy(newState, SLEEP_COST)
-  if (newState.gameState === GAME_STATES.playing) {
+  if (newState.gameStatus === GAME_STATUS.playing) {
     newState = {
       ...newState,
       foodItems: getFoodItmesFromLevel(LEVELS[newLevel])
@@ -169,12 +157,13 @@ export function getInitState() {
     characterPosition: CHAR_RADIUS,
     characterWithFood: false,
     characterEnergy: INIT_ENERY,
-    gameState: GAME_STATES.playing,
+    gameStatus: GAME_STATUS.playing,
     foodItems: getFoodItmesFromLevel(LEVELS[initLevel]),
     level: initLevel,
     levelChanged: false,
   }
 }
+
 
 export function gameReducer(state, action) {
   state = {...state, levelChanged: false}

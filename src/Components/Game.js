@@ -1,5 +1,10 @@
 import React, {useReducer, useState} from 'react'
 
+import {
+  GAME_STATUS, SPEED, FOOD_RADIUS, CHAR_RADIUS,
+  LEFT_CODE, RIGHT_CODE, S_CODE, PICKUP_CODE, GO_CODE,
+  GAME_WIDTH, GAME_HEIGHT,
+} from '../GameData/Options'
 import Character from './Character'
 import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
@@ -8,25 +13,6 @@ import {Defeat, Victory} from './EndGame'
 import {LEVELS} from '../GameData/Levels'
 import {getInitState, gameReducer} from '../Reducer'
 import {useAnimationFrame} from '../Hooks/useAnimationEffect'
-
-
-const GAME_WIDTH = 1000
-const GAME_HEIGHT = 60
-const SPEED = 3
-const CHAR_RADIUS = 30
-const FOOD_RADIUS = 16
-
-const LEFT_CODE = 37
-const RIGHT_CODE = 39
-const PICKUP_CODE = 16
-const S_CODE = 83
-const GO_CODE = 71
-
-const GAME_STATES = {
-  playing: 'playing',
-  won: 'won',
-  lost: 'lost'
-}
 
 
 function getLevelCost(level) {
@@ -38,7 +24,7 @@ function getLevelCost(level) {
 
 
 function userHandler(event, state, dispatch) {
-  if (state.gameState !== GAME_STATES.playing) {return}
+  if (state.gameStatus !== GAME_STATUS.playing) {return}
   // rewrite switch/case
   const which = event.which
   if (which === LEFT_CODE) {
@@ -56,11 +42,11 @@ function userHandler(event, state, dispatch) {
   }
 }
 
-function getEndscreen(gameState) {
-  switch (gameState) {
-    case GAME_STATES.lost:
+function getEndscreen(gameStatus) {
+  switch (gameStatus) {
+    case GAME_STATUS.lost:
       return <Defeat width={GAME_WIDTH} height={GAME_HEIGHT}/>
-    case GAME_STATES.won:
+    case GAME_STATUS.won:
       return <Victory width={GAME_WIDTH} height={GAME_HEIGHT}/>
     default:
       return null
@@ -70,7 +56,7 @@ function getEndscreen(gameState) {
 
 function Game({state, handleKeydown}) {
   const {
-    foodItems, gameState, level, characterPosition,
+    foodItems, gameStatus, level, characterPosition,
     characterWithFood, characterEnergy
   } = state
   const foodItemElems = foodItems.map(
@@ -79,7 +65,7 @@ function Game({state, handleKeydown}) {
             yPos={0}
             key={i.index}/>
   )
-  const endscreen = getEndscreen(gameState)
+  const endscreen = getEndscreen(gameStatus)
   return <svg
     focusable={true} xmlns="http://www.w3.org/2000/svg"
     width={GAME_WIDTH} height={GAME_HEIGHT} tabIndex={0}
@@ -114,7 +100,7 @@ export default function UserControlledGame() {
 
 function autoHandler(event, gameState, automatState, dispatch, setAutomatState) {
   if (
-    gameState.gameState !== GAME_STATES.playing ||
+    gameState.gameStatus !== GAME_STATUS.playing ||
     automatState.running
   ) {return}
   // rewrite switch/case
@@ -142,7 +128,7 @@ export function AutopilotGame({trajectoryGenerator, decisionMaker}) {
   })
   const [decisionMakerRunning, setDMRunning] = useState(false)
   const {targetItem, direction, running} = automationState
-  const {gameState, characterPosition, foodItems, level, levelChanged} = gState
+  const {gameStatus, characterPosition, foodItems, level, levelChanged} = gState
   if (levelChanged && targetItem !==0) {
     setAutomationState({
       ...automationState,
@@ -162,7 +148,7 @@ export function AutopilotGame({trajectoryGenerator, decisionMaker}) {
     }
   }
   const runAutopilot = () => {
-    if (gameState !== 'playing' || !running) {return}
+    if (gameStatus !== 'playing' || !running) {return}
     // if level changed
     //if (targetItem >= foodItems.length + (characterWithFood? 1 : 0)) {
     const movingForward = direction > 0
@@ -198,7 +184,7 @@ export function AutopilotGame({trajectoryGenerator, decisionMaker}) {
     )
   } else {
     keyDownHandler = (e) => {
-      if (gState.gameState === GAME_STATES.playing &&
+      if (gState.gameStatus === GAME_STATUS.playing &&
         !automationState.running &&
         e.which === GO_CODE) {
           setDMRunning(true)
