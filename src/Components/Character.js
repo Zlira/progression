@@ -22,7 +22,7 @@ export default class Character extends React.Component {
       const intervalIndex = setInterval(
         () => this.setState(prevState => ({
           textureIndex: (prevState.textureIndex ===4? 5 : 4)
-        })), 400
+        })), 350
       )
       console.log(intervalIndex)
       this.setState({
@@ -39,10 +39,13 @@ export default class Character extends React.Component {
   render() {
     const sheet = PIXI.loader.resources["sprites/spritesheet.json"].spritesheet;
     const textures = Object.values(sheet.textures)
+    const texture = textures[this.state.textureIndex]
+    const scale = this.props.radius * 2 / texture.orig.width
+    const {direction} = this.props
     return <Sprite
-      texture={textures[this.state.textureIndex]}
-      width={this.props.radius * 2}
-      height={this.props.radius * 2}
+      texture={texture}
+      anchor={{x: .5, y: 0}}
+      scale={{x: direction? scale * direction : scale, y: scale}}
       x={this.props.xPosition}
       />
   }
