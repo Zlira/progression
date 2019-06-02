@@ -113,7 +113,12 @@ function pickUpFood(state) {
 function putDownFood(state) {
   const newItems = Array.from(state.foodItems)
   const newItem = state.characterWithFood
-  newItem.position = state.characterPosition
+  console.log(state.direction)
+  if (state.direction < 0) {
+    newItem.position = state.characterPosition - 35
+  } else {
+    newItem.position = state.characterPosition
+  }
   newItems.push(newItem)
   let newState = {
     ...state,
@@ -171,7 +176,6 @@ export function gameReducer(state, action) {
   state = {
     ...state,
     levelChanged: false,
-    direction: 0
   }
   switch (action.type) {
     case 'MOVE':

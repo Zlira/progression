@@ -20,7 +20,7 @@ function getRandomEnvObjects(texture, positions, width, y, scale) {
 
 export default function Background({width}) {
   const scale = 2.4
-  const Y = 55
+  const Y = 65
   const sheet = PIXI.loader.resources['sprites/background.json'].spritesheet
   const groundTexture = sheet.textures['ground.png']
   const flowerTexture1 = sheet.textures['flowers_1.png']
@@ -34,7 +34,7 @@ export default function Background({width}) {
   return <Container>
       <TilingSprite
         texture={groundTexture}
-        scale={scale} x={0} y={55}
+        scale={scale} x={0} y={Y}
         width={width}/>
       {flowers1}{flowers2}
     </Container>

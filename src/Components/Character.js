@@ -1,7 +1,8 @@
 import React from 'react'
 
-import { Sprite } from 'react-pixi-fiber';
-import * as PIXI from 'pixi.js'
+import FoodItem from './FoodItem'
+import { Sprite, Container } from 'react-pixi-fiber';
+import {loader} from 'pixi.js'
 
 
 export default class Character extends React.Component {
@@ -36,17 +37,21 @@ export default class Character extends React.Component {
   }
 
   render() {
-    const sheet = PIXI.loader.resources["sprites/spritesheet.json"].spritesheet;
+    const sheet = loader.resources["sprites/spritesheet.json"].spritesheet
     const textures = Object.values(sheet.textures)
     const texture = textures[this.state.textureIndex]
     const scale = this.props.radius * 2 / texture.orig.width
     const {direction} = this.props
-    return <Sprite
+    return <Container x={this.props.xPosition}><Sprite
       texture={texture}
       anchor={{x: .5, y: 0}}
       scale={{x: direction? scale * direction : scale, y: scale}}
-      x={this.props.xPosition}
+      y={10}
       />
+      {this.props.withFood
+        ? <FoodItem yPos={20} xPos={this.props.direction === -1? -35 : 0}/>
+        : null}
+      </Container>
   }
 }
 //<g className='character-group' transform={`translate(${xPosition}, 0)`}>

@@ -1,10 +1,10 @@
 import React from 'react'
 
+import { Container } from 'react-pixi-fiber'
+
 
 export default function FoodItems({xPos, yPos, children}) {
-  return <g
-    className="food-items"
-    transform={`translate(${xPos}, ${yPos})`}>
+  return <Container>
     {children}
-  </g>
+  </Container>
 }

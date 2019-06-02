@@ -43,15 +43,27 @@ export default function Game({state, handleKeydown, handleKeyup}) {
   const stageOptions = {
     backgroundColor: BG_COLOR,
   }
-  const {characterPosition, characterEnergy, direction} = state
+  const {
+    characterPosition, characterEnergy, direction, foodItems,
+    characterWithFood,
+  } = state
+  const foodItemElems = foodItems.map(
+    i => <FoodItem radius={FOOD_RADIUS}
+            xPos={i.position}
+            yPos={30}
+            key={i.index}/>
+  )
   return (
     <div focusable={true} tabIndex={0}
       onKeyDown={handleKeydown} onKeyUp={handleKeyup}>
       <Stage options={stageOptions} width={GAME_WIDTH} height={GAME_HEIGHT}>
          <Background width={GAME_WIDTH} />
+         <Kitchen />
+         <FoodItems>{foodItemElems}</FoodItems>
          <Character xPosition={characterPosition}
            radius={CHAR_RADIUS} energy={Math.ceil(characterEnergy)}
            direction={direction}
+           withFood={characterWithFood}
          />
       </Stage>
     </div>)
