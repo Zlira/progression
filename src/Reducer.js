@@ -47,6 +47,7 @@ function rewardShouldBeGranted(state) {
 function getFoodItmesFromLevel(level) {
   return [...Array(level.itemsCount).keys()].map(
         i => ({index: i,
+               name: level.items[i],
                position: level.distanceToFirstItem
                          + level.distanceBetweenItems * i
                          + START_OFFSET

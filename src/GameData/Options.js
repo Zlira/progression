@@ -1,6 +1,6 @@
 export const GAME_WIDTH = 1000
 export const GAME_HEIGHT = 90
-export const BG_COLOR = 0x362B52
+export const BG_COLOR = 0x8450a5
 export const SPEED = 3
 export const CHAR_RADIUS = 30
 export const FOOD_RADIUS = 16

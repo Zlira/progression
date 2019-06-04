@@ -19,7 +19,7 @@ class App extends React.Component {
     PIXI.loader
       .add("sprites/spritesheet.json")
       .add("sprites/background.json")
-      .add("sprites/rock.png")
+      .add("sprites/food.json")
       .load(setup);
   }
 

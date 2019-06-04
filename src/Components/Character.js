@@ -48,8 +48,8 @@ export default class Character extends React.Component {
       scale={{x: direction? scale * direction : scale, y: scale}}
       y={10}
       />
-      {this.props.withFood
-        ? <FoodItem yPos={20} xPos={this.props.direction === -1? -35 : 0}/>
+      {this.props.food
+        ? <FoodItem yPos={20} name={this.props.food.name} xPos={this.props.direction === -1? -35 : 0}/>
         : null}
       </Container>
   }

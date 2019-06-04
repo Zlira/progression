@@ -45,12 +45,13 @@ export default function Game({state, handleKeydown, handleKeyup}) {
   }
   const {
     characterPosition, characterEnergy, direction, foodItems,
-    characterWithFood,
+    characterWithFood, level
   } = state
   const foodItemElems = foodItems.map(
     i => <FoodItem radius={FOOD_RADIUS}
             xPos={i.position}
             yPos={30}
+            name={i.name}
             key={i.index}/>
   )
   return (
@@ -63,7 +64,7 @@ export default function Game({state, handleKeydown, handleKeyup}) {
          <Character xPosition={characterPosition}
            radius={CHAR_RADIUS} energy={Math.ceil(characterEnergy)}
            direction={direction}
-           withFood={characterWithFood}
+           food={characterWithFood}
          />
       </Stage>
     </div>)
