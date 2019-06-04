@@ -1,5 +1,6 @@
 import React from 'react'
 
+import Rectangle from './CustomPixiComponents/Rectangle'
 import FoodItem from './FoodItem'
 import { Sprite, Container } from 'react-pixi-fiber';
 import {loader} from 'pixi.js'
@@ -42,12 +43,14 @@ export default class Character extends React.Component {
     const texture = textures[this.state.textureIndex]
     const scale = this.props.radius * 2 / texture.orig.width
     const {direction} = this.props
+    const energyBarWidth = Math.round(50 * this.props.energy / 100)
     return <Container x={this.props.xPosition}><Sprite
       texture={texture}
       anchor={{x: .5, y: 0}}
       scale={{x: direction? scale * direction : scale, y: scale}}
       y={10}
       />
+      <Rectangle width={energyBarWidth} height={4} y={5} x={-20} fill={0xffdf0f} />
       {this.props.food
         ? <FoodItem yPos={20} name={this.props.food.name} xPos={this.props.direction === -1? -35 : 0}/>
         : null}
