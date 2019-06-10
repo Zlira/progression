@@ -1,7 +1,7 @@
 import {LEVELS} from './GameData/Levels'
 import {
-  FOOD_RADIUS, CHAR_RADIUS, START_OFFSET,
-  INIT_ENERY, GAME_STATUS, GAME_WIDTH,
+  FOOD_WIDTH, CHAR_WIDTH, START_OFFSET,
+  INIT_ENERGY, GAME_STATUS, GAME_WIDTH,
   ENERGY_LOST_PER_TICK, SLEEP_COST,
 } from './GameData/Options'
 
@@ -28,7 +28,7 @@ function findNearbyFood(foodItems, position) {
     item = foodItems[i]
     if (
       Math.abs(item.position - position) <
-      FOOD_RADIUS + CHAR_RADIUS
+      (FOOD_WIDTH + CHAR_WIDTH) / 2
     ) {
       return [i, item]
     }
@@ -38,20 +38,20 @@ function findNearbyFood(foodItems, position) {
 
 function rewardShouldBeGranted(state) {
   return state.foodItems.reduce(
-    (acc, item) => acc && item.position < CHAR_RADIUS * 2,
+    (acc, item) => acc && item.position < CHAR_WIDTH,
     true
   )
 }
 
 
-function getFoodItmesFromLevel(level) {
+function getFoodItemsFromLevel(level) {
   return [...Array(level.itemsCount).keys()].map(
         i => ({index: i,
                name: level.items[i],
                position: level.distanceToFirstItem
                          + level.distanceBetweenItems * i
                          + START_OFFSET
-                         + FOOD_RADIUS})
+                         + FOOD_WIDTH / 2})
   )
 }
 
@@ -60,7 +60,7 @@ function grantReward(state) {
   const newLevel = state.level + 1
   const newEnergy = Math.min(
     state.characterEnergy + LEVELS[state.level].reward,
-    INIT_ENERY
+    INIT_ENERGY
   )
   if (newLevel > LEVELS.length - 1) {
     return {
@@ -74,7 +74,7 @@ function grantReward(state) {
     ...state,
     characterEnergy: newEnergy,
     level: newLevel,
-    foodItems: getFoodItmesFromLevel(LEVELS[newLevel]),
+    foodItems: getFoodItemsFromLevel(LEVELS[newLevel]),
     levelChanged: true,
   }
 }
@@ -83,7 +83,7 @@ function grantReward(state) {
 function move(state, displacement) {
   state = {...state, direction: displacement > 0? 1 : -1}
   let newPosition = state.characterPosition + displacement
-  newPosition = keepWithingBrackets(CHAR_RADIUS, GAME_WIDTH, newPosition)
+  newPosition = keepWithingBrackets(CHAR_WIDTH / 2, GAME_WIDTH, newPosition)
   if (newPosition === state.characterPosition) {
     return state
   }
@@ -147,7 +147,7 @@ function fallAsleep(state) {
   if (newState.gameStatus === GAME_STATUS.playing) {
     newState = {
       ...newState,
-      foodItems: getFoodItmesFromLevel(LEVELS[newLevel])
+      foodItems: getFoodItemsFromLevel(LEVELS[newLevel])
     }
   }
   return {
@@ -161,11 +161,11 @@ function fallAsleep(state) {
 export function getInitState() {
   const initLevel = 0
   return {
-    characterPosition: CHAR_RADIUS,
+    characterPosition: CHAR_WIDTH / 2,
     characterWithFood: false,
-    characterEnergy: INIT_ENERY,
+    characterEnergy: INIT_ENERGY,
     gameStatus: GAME_STATUS.playing,
-    foodItems: getFoodItmesFromLevel(LEVELS[initLevel]),
+    foodItems: getFoodItemsFromLevel(LEVELS[initLevel]),
     level: initLevel,
     levelChanged: false,
     direction: 0,

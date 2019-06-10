@@ -1,7 +1,7 @@
 import React, {useReducer, useState} from 'react'
 
 import {
-  CHAR_RADIUS, FOOD_RADIUS, GO_CODE, SPEED, GAME_STATUS, S_CODE
+  CHAR_WIDTH, FOOD_WIDTH, GO_CODE, SPEED, GAME_STATUS, S_CODE
 } from '../GameData/Options'
 import {getInitState, gameReducer} from '../Reducer'
 import Game from './Game'
@@ -67,8 +67,8 @@ export default function AutopilotGame({trajectoryGenerator, decisionMaker}) {
     )
     if (!foodItem && movingForward) {return}
     const targetPos = movingForward
-      ? foodItem.position - CHAR_RADIUS - FOOD_RADIUS + 2
-      : CHAR_RADIUS * 2 - 2
+      ? foodItem.position - CHAR_WIDTH / 2 - FOOD_WIDTH / 2 + 2
+      : CHAR_WIDTH - 2
     if (
       (characterPosition >= targetPos &&
        direction > 0) ||

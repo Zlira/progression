@@ -4,8 +4,7 @@ import {Stage} from 'react-pixi-fiber'
 import * as PIXI from 'pixi.js'
 
 import {
-  GAME_STATUS, FOOD_RADIUS, CHAR_RADIUS,
-  GAME_WIDTH, GAME_HEIGHT, BG_COLOR,
+  GAME_STATUS, GAME_WIDTH, GAME_HEIGHT, BG_COLOR,
 } from '../GameData/Options'
 import Background from './Background'
 import Character from './Character'
@@ -48,9 +47,8 @@ export default function Game({state, handleKeydown, handleKeyup}) {
     characterWithFood, level
   } = state
   const foodItemElems = foodItems.map(
-    i => <FoodItem radius={FOOD_RADIUS}
+    i => <FoodItem
             xPos={i.position}
-            yPos={30}
             name={i.name}
             key={i.index}/>
   )
@@ -62,7 +60,7 @@ export default function Game({state, handleKeydown, handleKeyup}) {
          <Kitchen />
          <FoodItems>{foodItemElems}</FoodItems>
          <Character xPosition={characterPosition}
-           radius={CHAR_RADIUS} energy={Math.ceil(characterEnergy)}
+           energy={Math.ceil(characterEnergy)}
            direction={direction}
            food={characterWithFood}
          />

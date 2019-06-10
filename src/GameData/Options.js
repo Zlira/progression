@@ -1,12 +1,16 @@
-export const GAME_WIDTH = 1000
-export const GAME_HEIGHT = 90
-export const BG_COLOR = 0x7f668f
+export const GAME_WIDTH = 840
+export const GAME_HEIGHT = 120
+export const BG_COLOR = 0x372c53
 export const SPEED = 3
-export const CHAR_RADIUS = 30
-export const FOOD_RADIUS = 16
+export const SCALE = 2
+export const FOOD_WIDTH = 16 * SCALE
+export const CHAR_WIDTH = 32 * SCALE
 
-export const START_OFFSET = CHAR_RADIUS * 2
-export const INIT_ENERY = 100
+export const GROUND_HEIGHT = 26
+export const GET_Y = (texture, bottomY) => GAME_HEIGHT - texture.orig.height * SCALE - bottomY
+export const START_OFFSET = CHAR_WIDTH
+
+export const INIT_ENERGY = 100
 export const ENERGY_LOST_PER_TICK = .05 * SPEED
 export const SLEEP_COST = 50
 
@@ -21,3 +25,6 @@ export const GAME_STATUS = {
   lost: 'lost'
 }
 
+export const PIXI_OPS = {
+  defaultAnchor: {x: 0, y: 1},
+}

@@ -4,6 +4,7 @@ import Rectangle from './CustomPixiComponents/Rectangle'
 import FoodItem from './FoodItem'
 import { Sprite, Container } from 'react-pixi-fiber';
 import {loader} from 'pixi.js'
+import {SCALE, GET_Y, GROUND_HEIGHT} from '../GameData/Options'
 
 
 export default class Character extends React.Component {
@@ -41,18 +42,19 @@ export default class Character extends React.Component {
     const sheet = loader.resources["sprites/spritesheet.json"].spritesheet
     const textures = Object.values(sheet.textures)
     const texture = textures[this.state.textureIndex]
-    const scale = this.props.radius * 2 / texture.orig.width
     const {direction} = this.props
     const energyBarWidth = Math.round(50 * this.props.energy / 100)
+    const characterY = GET_Y(texture, GROUND_HEIGHT) + 3
     return <Container x={this.props.xPosition}><Sprite
       texture={texture}
       anchor={{x: .5, y: 0}}
-      scale={{x: direction? scale * direction : scale, y: scale}}
-      y={10}
+      scale={{x: direction? SCALE * direction : SCALE, y: SCALE}}
+      y={characterY}
       />
-      <Rectangle width={energyBarWidth} height={4} y={5} x={-20} fill={0xffdf0f} />
+      <Rectangle width={energyBarWidth} height={4} y={5} x={-20} fill={0xffe859} />
       {this.props.food
-        ? <FoodItem yPos={20} name={this.props.food.name} xPos={this.props.direction === -1? -35 : 0}/>
+        ? <FoodItem yPos={characterY + 10} xPos={this.props.direction === -1? -35 : 0}
+           name={this.props.food.name} />
         : null}
       </Container>
   }
