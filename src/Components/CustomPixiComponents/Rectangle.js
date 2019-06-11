@@ -6,12 +6,13 @@ const TYPE = "Rectangle";
 export const behavior = {
   customDisplayObject: props => new Graphics(),
   customApplyProps: function(instance, oldProps, newProps) {
-    let { fill, x, y, alpha, width, height } = newProps;
+    let { fill, x, y, alpha, width, height, radius } = newProps;
     alpha = alpha || 1
+    radius = radius || 0
     instance.clear();
     instance.alpha = alpha
     instance.beginFill(fill);
-    instance.drawRect(x, y, width, height);
+    instance.drawRoundedRect(x, y, width, height, radius);
     instance.endFill();
   }
 };

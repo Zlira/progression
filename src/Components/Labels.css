@@ -1,0 +1,37 @@
+.game-label {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  font-family: 'Press Start 2P';
+  color: white;
+  font-size: 10px;
+}
+
+.game-label__reward {
+  top: 6px;
+  left: 10px;
+}
+
+.game-label__controls {
+  top: 6px;
+  left: 600px;
+}
+
+.game-label__reward-amount,
+.game-label__control-key {
+  color: #ffe859;
+}
+
+.game-label__control-key {
+  border: 1px solid #ffe859;
+  margin-right: 3px;
+  padding: 3px;
+  border-radius: 2px;
+}
+
+.game-label__control {
+  margin: 0px;
+  padding: 0px;
+}
+
+

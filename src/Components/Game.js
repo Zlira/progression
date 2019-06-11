@@ -12,7 +12,10 @@ import FoodItem from './FoodItem'
 import FoodItems from './FoodItems'
 import Kitchen from './Kitchen'
 import {Defeat, Victory} from './EndGame'
+import Labels from './Labels'
 import {LEVELS} from '../GameData/Levels'
+
+import './Game.css'
 
 // todo where's an appropriate place for this?
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -54,8 +57,9 @@ export default function Game({state, handleKeydown, handleKeyup}) {
   )
   const endscreen = getEndscreen(state.gameStatus)
   return (
-    <div focusable={true} tabIndex={0}
+    <div className="game-container" focusable={true} tabIndex={0}
       onKeyDown={handleKeydown} onKeyUp={handleKeyup}>
+      <Labels levelEnergy={LEVELS[level].reward}/>
       <Stage options={stageOptions} width={GAME_WIDTH} height={GAME_HEIGHT}>
          <Background width={GAME_WIDTH} />
          <Kitchen />
