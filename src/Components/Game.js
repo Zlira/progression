@@ -52,6 +52,7 @@ export default function Game({state, handleKeydown, handleKeyup}) {
             name={i.name}
             key={i.index}/>
   )
+  const endscreen = getEndscreen(state.gameStatus)
   return (
     <div focusable={true} tabIndex={0}
       onKeyDown={handleKeydown} onKeyUp={handleKeyup}>
@@ -64,6 +65,7 @@ export default function Game({state, handleKeydown, handleKeyup}) {
            direction={direction}
            food={characterWithFood}
          />
+         {endscreen}
       </Stage>
     </div>)
 }
