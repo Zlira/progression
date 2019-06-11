@@ -1,6 +1,7 @@
 body {
   font-family: 'Open Sans', sans-serif;
   font-size: 16px;
+  line-height: 1.5em;
 }
 
 article {
@@ -14,12 +15,13 @@ strong, h1, summary {
 
 h1 {
   font-size: 2.5em;
+  font-family: 'Press Start 2P';
+  line-height: 2em;
 }
 
 summary {
   font-size: 1.1em;
   font-weight: 600;
-  line-height: 1.5em;
   margin: 16px 0;
 }
 

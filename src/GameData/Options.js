@@ -1,5 +1,5 @@
 export const GAME_WIDTH = 840
-export const GAME_HEIGHT = 120
+export const GAME_HEIGHT = 140
 export const BG_COLOR = 0x372c53
 export const SPEED = 3
 export const SCALE = 2
@@ -23,8 +23,4 @@ export const GAME_STATUS = {
   playing: 'playing',
   won: 'won',
   lost: 'lost'
-}
-
-export const PIXI_OPS = {
-  defaultAnchor: {x: 0, y: 1},
 }
